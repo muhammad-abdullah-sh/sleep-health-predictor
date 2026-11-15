@@ -62,7 +62,7 @@ sleep-health-predictor/
 You can also test the API at http://127.0.0.1:8000/docs.
 
 ## Dataset
-Sleep Health and Lifestyle dataset (`Sleep_health_and_lifestyle_dataset.csv.csv`, 374 rows). `[ADD: the source link and licence, for example the Kaggle page you downloaded it from.]`
+Sleep Health and Lifestyle dataset (`Sleep_health_and_lifestyle_dataset.csv.csv`, 374 rows). 
 
 ## Limitations
 - The dataset is small (374 rows), so results may not generalise to real people.
@@ -76,7 +76,11 @@ Sleep Health and Lifestyle dataset (`Sleep_health_and_lifestyle_dataset.csv.csv`
 - How a front end talks to a backend.
 
 ## Team
-`[ADD: teammate names and GitHub links, and one line on what you personally built.]`
+This was a group project for a Machine Learning lab at COMSATS University Islamabad.
+- Hammad Shafqat
+- Abdullah Bin Rizwan
+- Abdullah Shakeel (Me)
+- All contributed to the Making of This Project, I focused on the Model training in `train.ipynb` (data preparation, encoding and training the models) and contributions to the front-end page `index.html`
 
 ## Next steps
 - Compare more models, such as Random Forest, and use cross-validation.
