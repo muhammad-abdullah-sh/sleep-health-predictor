@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Sleep & Health Predictor</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 30px; background-color: #f4f6f8; color: #333; }
+    .wrapper { max-width: 620px; margin: 0 auto; background: white; padding: 25px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+    h2 { margin-top: 0; color: #007bff; }
+    .form-group { margin-bottom: 12px; }
+    label { display: block; font-weight: bold; margin-bottom: 4px; font-size: 13px; }
+    input, select { width: 100%; box-sizing: border-box; padding: 8px; border: 1px solid #ccc; border-radius: 4px; font-size: 14px; }
+    button { width: 100%; margin-top: 15px; padding: 12px; background: #007bff; color: white; border: none; border-radius: 4px; font-size: 16px; cursor: pointer; font-weight: bold; }
+    button:hover { background: #0056b3; }
+    .result-section { margin-top: 25px; display: none; }
+    .card { background: #eef7ff; border-left: 5px solid #007bff; padding: 15px; margin-bottom: 15px; border-radius: 4px; }
+    .card h4 { margin: 0 0 5px 0; color: #0056b3; }
+
+    /* NEW: recommendations styling */
+    .card.rec { background: #eefaf0; border-left-color: #28a745; }
+    .card.rec h4 { color: #1e7e34; }
+    .card.rec ul { margin: 8px 0 0 0; padding-left: 20px; }
+    .card.rec li { margin-bottom: 8px; line-height: 1.4; }
+    .disclaimer { font-size: 12px; color: #777; margin-top: 10px; }
+  </style>
+</head>
+<body>
+
+  <div class="wrapper">
+    <h2>Sleep Health & Lifestyle Predictor</h2>
+    <p>Fill in the details below to generate the chained predictions.</p>
+
+    <form id="healthForm">
+      <div class="form-group">
+        <label>Gender:</label>
+        <select id="gender">
+          <option value="Male">Male</option>
+          <option value="Female">Female</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Age:</label>
+        <input type="number" id="age" value="32" required>
+      </div>
+
+      <div class="form-group">
+        <label>Occupation:</label>
+        <select id="occupation">
+          <option value="Software Engineer">Software Engineer</option>
+          <option value="Doctor">Doctor</option>
+          <option value="Teacher">Teacher</option>
+          <option value="Nurse">Nurse</option>
+          <option value="Engineer">Engineer</option>
+          <option value="Accountant">Accountant</option>
+          <option value="Lawyer">Lawyer</option>
+          <option value="Salesperson">Salesperson</option>
+          <option value="Scientist">Scientist</option>
+          <option value="Manager">Manager</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Sleep Duration (hours):</label>
+        <input type="number" step="0.1" id="sleep_duration" value="6.5" required>
+      </div>
+
+      <div class="form-group">
+        <label>Physical Activity Level (minutes/day):</label>
+        <input type="number" id="physical_activity" value="60" required>
+      </div>
+
+      <div class="form-group">
+        <label>BMI Category:</label>
+        <select id="bmi_category">
+          <option value="Normal">Normal</option>
+          <option value="Overweight">Overweight</option>
+          <option value="Obese">Obese</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Blood Pressure (e.g. 120/80):</label>
+        <input type="text" id="blood_pressure" value="125/80" required>
+      </div>
+
+      <div class="form-group">
+        <label>Heart Rate (bpm):</label>
+        <input type="number" id="heart_rate" value="72" required>
+      </div>
+
+      <div class="form-group">
+        <label>Daily Steps:</label>
+        <input type="number" id="daily_steps" value="7000" required>
+      </div>
+
+      <button type="submit">Run Complete Prediction Chain</button>
+    </form>
+
+    <div id="results" class="result-section">
+      <div class="card">
+        <h4>1. Sleep Quality Rating (Linear Regression)</h4>
+        <p><strong>Predicted Score:</strong> <span id="out_quality"></span> / 10</p>
+        <p><strong>Suggestion:</strong> <span id="out_quality_sug"></span></p>
+      </div>
+
+      <div class="card">
+        <h4>2. Stress Level (Linear Regression via Sleep Quality)</h4>
+        <p><strong>Predicted Stress:</strong> <span id="out_stress"></span> / 10</p>
+        <p><strong>Suggestion:</strong> <span id="out_stress_sug"></span></p>
+      </div>
+
+      <div class="card">
+        <h4>3. Sleep Disorder Diagnosis (Decision Tree via Quality & Stress)</h4>
+        <p><strong>Predicted Condition:</strong> <span id="out_disorder"></span></p>
+        <p><strong>Advice:</strong> <span id="out_disorder_advice"></span></p>
+      </div>
+
+      <!-- NEW: personalised recommendations -->
+      <div class="card rec">
+        <h4>Personalised Recommendations</h4>
+        <ul id="out_recommendations"></ul>
+        <p class="disclaimer" id="out_disclaimer"></p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Change the port here if your server runs on a different one (e.g. 8001)
+    const API_URL = "http://127.0.0.1:8000/predict/chained";
+
+    document.getElementById("healthForm").addEventListener("submit", async function(e) {
+      e.preventDefault();
+
+      const payload = {
+        gender: document.getElementById("gender").value,
+        age: parseInt(document.getElementById("age").value),
+        occupation: document.getElementById("occupation").value,
+        sleep_duration: parseFloat(document.getElementById("sleep_duration").value),
+        physical_activity: parseInt(document.getElementById("physical_activity").value),
+        bmi_category: document.getElementById("bmi_category").value,
+        blood_pressure: document.getElementById("blood_pressure").value.trim(),
+        heart_rate: parseInt(document.getElementById("heart_rate").value),
+        daily_steps: parseInt(document.getElementById("daily_steps").value)
+      };
+
+      try {
+        const response = await fetch(API_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+
+        // NEW: show a clear message if the server returned an error
+        if (!response.ok) {
+          alert("The server returned an error (" + response.status + "). Check your inputs, e.g. blood pressure must look like 120/80.");
+          return;
+        }
+
+        const data = await response.json();
+
+        document.getElementById("out_quality").textContent = data.quality_of_sleep;
+        document.getElementById("out_quality_sug").textContent = data.quality_suggestion;
+
+        document.getElementById("out_stress").textContent = data.stress_level;
+        document.getElementById("out_stress_sug").textContent = data.stress_suggestion;
+
+        document.getElementById("out_disorder").textContent = data.sleep_disorder;
+        document.getElementById("out_disorder_advice").textContent = data.disorder_advice;
+
+        // NEW: render the recommendations list
+        const recList = document.getElementById("out_recommendations");
+        recList.innerHTML = "";
+        (data.recommendations || []).forEach(function(rec) {
+          const li = document.createElement("li");
+          li.textContent = rec;
+          recList.appendChild(li);
+        });
+        document.getElementById("out_disclaimer").textContent = data.disclaimer || "";
+
+        document.getElementById("results").style.display = "block";
+      } catch (err) {
+        alert("Could not connect to the FastAPI server at " + API_URL + ". Ensure the server is running.");
+      }
+    });
+  </script>
+</body>
+</html>
