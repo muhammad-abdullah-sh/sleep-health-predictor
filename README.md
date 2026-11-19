@@ -87,6 +87,19 @@ This was a group project for a Machine Learning lab at COMSATS University Islama
 - Add a confusion matrix for the sleep-disorder model.
 - Deploy the app online.
 
+## Power BI Dashboard
+An interactive 2-page dashboard built on the same dataset.
+- Page 1: overview and what drives sleep quality
+- Page 2: who is at risk of a sleep disorder
+
+![Overview](dashboard/page_1_dashb.png)
+![Risk drill-down](dashboard/page_2_dashboard.png)
+
+Open `dashboard/Sleep_Health_Dashboard.pbix` in Power BI Desktop (free, Windows) to explore it.
+Small public dataset (374 rows, many repeated rows). Patterns show association, not cause. Not medical advice.
+
 ## Author
 Abdullah Shakeel, Business Data Analytics student at COMSATS University Islamabad.
 LinkedIn: https://www.linkedin.com/in/abdullahh-shakeel/
+
+
